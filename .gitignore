@@ -1,3 +1,9 @@
+# Project Specfic
+# nbdime
+*.orig
+
+
+# Template
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
