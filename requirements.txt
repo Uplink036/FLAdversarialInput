@@ -1,4 +1,6 @@
 matplotlib
-tensorflow
 keras
 adversarial-robustness-toolbox
+# Part2
+flwr
+torch
