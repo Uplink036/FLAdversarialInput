@@ -2,6 +2,7 @@
 
 from collections import OrderedDict
 
+import numpy as np
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
@@ -9,6 +10,7 @@ from flwr_datasets import FederatedDataset
 from flwr_datasets.partitioner import IidPartitioner
 from torch.utils.data import DataLoader
 from torchvision.transforms import Compose, Normalize, ToTensor
+from sklearn.metrics import accuracy_score, f1_score, roc_auc_score, cohen_kappa_score
 
 
 class Net(nn.Module):
@@ -89,17 +91,31 @@ def test(net, testloader, device):
     net.to(device)
     criterion = torch.nn.CrossEntropyLoss()
     correct, loss = 0, 0.0
+    y_test, y_pred = [], []
     with torch.no_grad():
         for batch in testloader:
             images = batch["img"].to(device)
             labels = batch["label"].to(device)
             outputs = net(images)
+            y_test += [label.item() for label in labels]
+            y_pred += [torch.max(output, 0)[1].item() for output in outputs]
             loss += criterion(outputs, labels).item()
             correct += (torch.max(outputs.data, 1)[1] == labels).sum().item()
     accuracy = correct / len(testloader.dataset)
     loss = loss / len(testloader)
-    return loss, accuracy
+    f1, roc_auc, cohen_kappa_score = eval_metrics(y_test, y_pred)
+    return loss, accuracy, f1, roc_auc, cohen_kappa_score
 
+def eval_metrics(y_true, y_pred):
+    f1 = f1_score(y_true, y_pred, average='weighted')
+    cohen_kappa = cohen_kappa_score(y_true, y_pred)
+
+    y_true_bin = np.eye(10)[y_true]
+    y_pred_bin = np.eye(10)[y_pred]
+
+    # Calculate ROC AUC
+    roc_auc = roc_auc_score(y_true_bin, y_pred_bin, average='weighted', multi_class='ovr')
+    return f1, roc_auc, cohen_kappa
 
 def get_weights(net):
     return [val.cpu().numpy() for _, val in net.state_dict().items()]
