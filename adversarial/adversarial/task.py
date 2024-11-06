@@ -104,8 +104,7 @@ def test(net, testloader, device):
     accuracy = correct / len(testloader.dataset)
     loss = loss / len(testloader)
     f1, roc_auc, cohen_kappa_score = eval_metrics(y_test, y_pred)
-    print(f"Accuracy: {accuracy}, F1: {f1}, Kappa: {cohen_kappa_score}, ROC AUC: {roc_auc}")
-    return loss, accuracy
+    return loss, accuracy, f1, roc_auc, cohen_kappa_score
 
 def eval_metrics(y_true, y_pred):
     f1 = f1_score(y_true, y_pred, average='weighted')
@@ -116,7 +115,7 @@ def eval_metrics(y_true, y_pred):
 
     # Calculate ROC AUC
     roc_auc = roc_auc_score(y_true_bin, y_pred_bin, average='weighted', multi_class='ovr')
-    return f1, roc_auc, roc_auc, cohen_kappa
+    return f1, roc_auc, cohen_kappa
 
 def get_weights(net):
     return [val.cpu().numpy() for _, val in net.state_dict().items()]
