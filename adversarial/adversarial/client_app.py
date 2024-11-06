@@ -9,8 +9,9 @@ from adversarial.task import Net, get_weights, load_data, set_weights, test, tra
 
 # Define Flower Client and client_fn
 class FlowerClient(NumPyClient):
-    def __init__(self, net, trainloader, valloader, local_epochs):
+    def __init__(self, net, partition_id, trainloader, valloader, local_epochs):
         self.net = net
+        self.partition_id = partition_id
         self.trainloader = trainloader
         self.valloader = valloader
         self.local_epochs = local_epochs
@@ -18,6 +19,10 @@ class FlowerClient(NumPyClient):
         self.net.to(self.device)
 
     def fit(self, parameters, config):
+        if "malicious" in config.keys() and config["malicious"] == True:
+            print("Bad Stuff")
+            config["malicious"] = False
+        
         set_weights(self.net, parameters)
         train_loss = train(
             self.net,
@@ -46,7 +51,7 @@ def client_fn(context: Context):
     local_epochs = context.run_config["local-epochs"]
 
     # Return Client instance
-    return FlowerClient(net, trainloader, valloader, local_epochs).to_client()
+    return FlowerClient(net, partition_id, trainloader, valloader, local_epochs).to_client()
 
 
 # Flower ClientApp

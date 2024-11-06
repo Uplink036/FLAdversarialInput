@@ -1,8 +1,6 @@
 """Adversarial: A Flower / PyTorch app."""
-
 from flwr.common import Context, ndarrays_to_parameters
 from flwr.server import ServerApp, ServerAppComponents, ServerConfig
-from flwr.server.strategy import FedAvg
 from adversarial.task import Net, get_weights
 import pandas as pd
 
@@ -34,6 +32,7 @@ def weighted_average(metrics: list[tuple[int, dict[str, float]]]):
             "accuracy_per_client": [m["accuracy"] for _, m in metrics],
             "kappa": sum(kappa) / sum(examples), 
             "kappa_per_client": [m["kappa"] for _, m in metrics]}
+from adversarial.server_aid import weighted_average, CustomClientConfigStrategy, fit_config
 
 def server_fn(context: Context):
     # Read from config
@@ -45,12 +44,13 @@ def server_fn(context: Context):
     parameters = ndarrays_to_parameters(ndarrays)
 
     # Define strategy
-    strategy = FedAvg(
+    strategy = CustomClientConfigStrategy(
         fraction_fit=fraction_fit,
         fraction_evaluate=1.0,
         min_available_clients=2,
         initial_parameters=parameters,
         evaluate_metrics_aggregation_fn=weighted_average,
+        on_fit_config_fn=fit_config        
     )
     config = ServerConfig(num_rounds=num_rounds)
 
