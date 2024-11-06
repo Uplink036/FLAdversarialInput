@@ -11,7 +11,7 @@ from flwr_datasets.partitioner import IidPartitioner
 from torch.utils.data import DataLoader
 from torchvision.transforms import Compose, Normalize, ToTensor
 from sklearn.metrics import accuracy_score, f1_score, roc_auc_score, cohen_kappa_score
-
+import pandas as pd
 
 class Net(nn.Module):
     """Model (simple CNN adapted from 'PyTorch: A 60 Minute Blitz')"""

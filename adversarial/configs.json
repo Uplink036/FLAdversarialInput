@@ -1,0 +1,65 @@
+{
+    "configs": [
+        {
+            "iid": true,
+            "n_attack": 0,
+            "aggregate": "FedAvg"
+        },
+        {
+            "iid": true,
+            "n_attack": 1,
+            "aggregate": "FedAvg"
+        },
+        {
+            "iid": true,
+            "n_attack": 2,
+            "aggregate": "FedAvg"
+        },
+        {
+            "iid": false,
+            "n_attack": 0,
+            "aggregate": "FedAvg"
+        },
+        {
+            "iid": false,
+            "n_attack": 1,
+            "aggregate": "FedAvg"
+        },
+        {
+            "iid": false,
+            "n_attack": 2,
+            "aggregate": "FedAvg"
+        },
+        {
+            "iid": true,
+            "n_attack": 0,
+            "aggregate": "FedProx"
+        },
+        {
+            "iid": true,
+            "n_attack": 1,
+            "aggregate": "FedProx"
+        },
+        {
+            "iid": true,
+            "n_attack": 2,
+            "aggregate": "FedProx"
+        },
+        {
+            "iid": false,
+            "n_attack": 0,
+            "aggregate": "FedProx"
+        },
+        {
+            "iid": false,
+            "n_attack": 1,
+            "aggregate": "FedProx"
+        },
+        {
+            "iid": false,
+            "n_attack": 2,
+            "aggregate": "FedProx"
+        }
+
+    ]
+}
