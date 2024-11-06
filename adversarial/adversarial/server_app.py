@@ -5,6 +5,17 @@ from flwr.server import ServerApp, ServerAppComponents, ServerConfig
 from flwr.server.strategy import FedAvg
 from adversarial.task import Net, get_weights
 
+def weighted_average(metrics: list[tuple[int, dict[str, float]]]):
+    # Multiply accuracy of each client by number of examples used
+    accuracies = [num_examples*m["accuracy"] for num_examples, m in metrics]
+    kappa = [num_examples*m["kappa"] for num_examples, m in metrics]
+    examples = [num_examples for num_examples, _ in metrics]
+
+    # Aggregate and return custom metric (weighted average)
+    return {"accuracy": sum(accuracies) / sum(examples) , 
+            "accuracy_per_client": [m["accuracy"] for _, m in metrics],
+            "kappa": sum(kappa) / sum(examples), 
+            "kappa_per_client": [m["kappa"] for _, m in metrics]}
 
 def server_fn(context: Context):
     # Read from config
@@ -21,6 +32,7 @@ def server_fn(context: Context):
         fraction_evaluate=1.0,
         min_available_clients=2,
         initial_parameters=parameters,
+        evaluate_metrics_aggregation_fn=weighted_average,
     )
     config = ServerConfig(num_rounds=num_rounds)
 
