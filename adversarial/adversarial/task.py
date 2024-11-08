@@ -90,7 +90,6 @@ def train(net, trainloader, epochs, device):
             loss = criterion(net(images.to(device)), labels.to(device))
             loss.backward()
             optimizer.step()
-            print(net.conv1.weight.grad)
             running_loss += loss.item()
 
     avg_trainloss = running_loss / len(trainloader)

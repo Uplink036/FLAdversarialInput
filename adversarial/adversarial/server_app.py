@@ -29,7 +29,7 @@ def server_fn(context: Context):
             fraction_fit=fraction_fit,
             fraction_evaluate=1.0,
             min_available_clients=2,
-            min_fit_clients=2,
+            min_fit_clients=5,
             initial_parameters=parameters,
             evaluate_metrics_aggregation_fn=weighted_evaluate_average,
             on_fit_config_fn=fit_config,

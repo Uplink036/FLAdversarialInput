@@ -1,7 +1,7 @@
 
 from functools import partial, reduce
 from typing import Optional, Union
-from flwr.common import FitIns, Parameters, FitRes, Scalar, parameters_to_ndarrays, ndarrays_to_parameters, NDArrays
+from flwr.common import FitIns, Parameters, FitRes, Scalar, parameters_to_ndarrays, ndarrays_to_parameters, NDArray
 from flwr.server.client_proxy import ClientProxy
 from flwr.server.strategy import FedAvg, FedProx
 import pandas as pd
@@ -45,44 +45,46 @@ def weighted_evaluate_average(metrics: list[tuple[int, dict[str, float]]]):
 
 
 def outlier_fit_average(
-        self,
         server_round: int,
         results: list[tuple[ClientProxy, FitRes]],
         failures: list[Union[tuple[ClientProxy, FitRes], BaseException]],
     ) -> tuple[Optional[Parameters], dict[str, Scalar]]:
-        """Aggregate fit results using weighted average."""
-        if not results:
-            return None, {}
+        """Compute in-place weighted average."""
+        # Count total examples
+        num_examples_total = sum(fit_res.num_examples for (_, fit_res) in results)
 
-        # Convert results
-        weights_results = [
-            (parameters_to_ndarrays(fit_res.parameters), fit_res.num_examples)
-            for _, fit_res in results
+        # Compute scaling factors for each result
+        scaling_factors = np.asarray(
+            [fit_res.num_examples / num_examples_total for _, fit_res in results]
+        )
+
+        def _try_inplace(
+            x: NDArray, y: Union[NDArray, np.float64], np_binary_op: np.ufunc
+        ) -> NDArray:
+            return (  # type: ignore[no-any-return]
+                np_binary_op(x, y, out=x)
+                if np.can_cast(y, x.dtype, casting="same_kind")
+                else np_binary_op(x, np.array(y, x.dtype), out=x)
+            )
+
+        # Let's do in-place aggregation
+        # Get first result, then add up each other
+        params = [
+            _try_inplace(x, scaling_factors[0], np_binary_op=np.multiply)
+            for x in parameters_to_ndarrays(results[0][1].parameters)
         ]
-        num_examples_total = sum(num_examples for (_, num_examples) in results)
 
-        # Create a list of weights, each multiplied by the related number of examples
-        weighted_weights = [
-            [layer * num_examples for layer in weights] for weights, num_examples in results
-        ]
+        for i, (_, fit_res) in enumerate(results[1:], start=1):
+            res = (
+                _try_inplace(x, scaling_factors[i], np_binary_op=np.multiply)
+                for x in parameters_to_ndarrays(fit_res.parameters)
+            )
+            params = [
+                reduce(partial(_try_inplace, np_binary_op=np.add), layer_updates)
+                for layer_updates in zip(params, res)
+            ]
 
-        
-        # Compute average weights of each layer
-        weights_prime: NDArrays = [
-            reduce(np.add, layer_updates) / num_examples_total
-            for layer_updates in zip(*weighted_weights)
-        ]
-        aggregated_ndarrays = weights_prime(weights_results)
-
-        parameters_aggregated = ndarrays_to_parameters(aggregated_ndarrays)
-
-        # Aggregate custom metrics if aggregation fn was provided
-        metrics_aggregated = {}
-        if self.fit_metrics_aggregation_fn:
-            fit_metrics = [(res.num_examples, res.metrics) for _, res in results]
-            metrics_aggregated = self.fit_metrics_aggregation_fn(fit_metrics)
-
-        return parameters_aggregated, metrics_aggregated
+        return params
 
 def fit_config(server_round: int):
     """Return training configuration dict for each round."""
@@ -118,6 +120,28 @@ class CustomClientConfigStrategyFedAvg(FedAvg):
         num_clients = int(num_available_clients * self.fraction_fit)
         return max(num_clients, self.min_fit_clients), self.min_available_clients
 
+    def aggregate_fit(
+        self,
+        server_round: int,
+        results: list[tuple[ClientProxy, FitRes]],
+        failures: list[Union[tuple[ClientProxy, FitRes], BaseException]],
+    ) :
+        # Get fitresults
+        fit_results = [fit_res for (_, fit_res) in results]
+        # Get train_loss from each client
+        train_losses = [fit_res.metrics["train_loss"] for fit_res in fit_results]
+        print(f"Train losses: {train_losses}")
+        # Remove the client with the highest train loss
+        max_loss_idx = np.argmax(train_losses)
+        print(f"Client with highest loss: {max_loss_idx}")
+        results.pop(max_loss_idx)
+        
+        fit_results = [fit_res for (_, fit_res) in results]
+        # Get train_loss from each client
+        train_losses = [fit_res.metrics["train_loss"] for fit_res in fit_results]
+        print(f"Train losses: {train_losses}")
+        return super().aggregate_fit(server_round, results, failures)
+    
 class CustomClientConfigStrategyFedProx(FedProx):
     def configure_fit(self, server_round: int, parameters: Parameters, client_manager):
         # Sample clients
