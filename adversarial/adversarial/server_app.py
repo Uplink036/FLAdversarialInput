@@ -6,7 +6,7 @@ import pandas as pd
 import os
 import dotenv
 from adversarial.configs import Configs
-from adversarial.server_aid import weighted_evaluate_average, CustomClientConfigStrategyFedAvg, CustomClientConfigStrategyFedProx, fit_config
+from adversarial.server_aid import weighted_evaluate_average, CustomClientConfigStrategyFedAvg, CustomClientConfigStrategyFedProx, fit_config, CustomClientConfigStrategyKrum
 
 def server_fn(context: Context):
     # Read from config
@@ -28,8 +28,8 @@ def server_fn(context: Context):
         strategy = CustomClientConfigStrategyFedAvg(
             fraction_fit=fraction_fit,
             fraction_evaluate=1.0,
-            min_available_clients=2,
-            min_fit_clients=5,
+            min_available_clients=4,
+            min_fit_clients=4,
             initial_parameters=parameters,
             evaluate_metrics_aggregation_fn=weighted_evaluate_average,
             on_fit_config_fn=fit_config,
@@ -38,12 +38,22 @@ def server_fn(context: Context):
         strategy = CustomClientConfigStrategyFedProx(
             fraction_fit=fraction_fit,
             fraction_evaluate=1.0,
-            min_available_clients=2,
-            min_fit_clients=5,
+            min_available_clients=4,
+            min_fit_clients=4,
             initial_parameters=parameters,
             evaluate_metrics_aggregation_fn=weighted_evaluate_average,
             on_fit_config_fn=fit_config,
             proximal_mu=config.get_proximal_mu(),
+        )
+    elif config.get_aggregate_fn() == "krum":
+        strategy = CustomClientConfigStrategyKrum(
+            fraction_fit=fraction_fit,
+            fraction_evaluate=1.0,
+            min_available_clients=4,
+            min_fit_clients=4,
+            initial_parameters=parameters,
+            evaluate_metrics_aggregation_fn=weighted_evaluate_average,
+            on_fit_config_fn=fit_config,
         )
     
     config = ServerConfig(num_rounds=num_rounds)
