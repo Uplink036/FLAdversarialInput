@@ -38,6 +38,9 @@ class Configs():
         else:
             raise ValueError("Partition by is only used in Non-IID")
         
+    def get_defense_number(self):
+        return self._get_current_config()["defense"]
+        
     
 
 

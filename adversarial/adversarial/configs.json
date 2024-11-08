@@ -3,62 +3,110 @@
         {
             "dist": "iid",
             "n_attack": 0,
-            "aggregate": "fedavg"
+            "aggregate": "fedavg",
+            "defense": 0
         },
         {
             "dist": "iid",
             "n_attack": 1,
-            "aggregate": "fedavg"
+            "aggregate": "fedavg",
+            "defense": 0
         },
         {
             "dist": "iid",
             "n_attack": 2,
-            "aggregate": "fedavg"
+            "aggregate": "fedavg",
+            "defense": 0
         },
         {
             "dist": "noniid",
             "n_attack": 0,
-            "aggregate": "fedavg"
+            "aggregate": "fedavg",
+            "defense": 0
         },
         {
             "dist": "noniid",
             "n_attack": 1,
-            "aggregate": "fedavg"
+            "aggregate": "fedavg",
+            "defense": 0
         },
         {
             "dist": "noniid",
             "n_attack": 2,
-            "aggregate": "fedavg"
+            "aggregate": "fedavg",
+            "defense": 0
         },
         {
             "dist": "iid",
             "n_attack": 0,
-            "aggregate": "fedprox"
+            "aggregate": "fedprox",
+            "defense": 0
         },
         {
             "dist": "iid",
             "n_attack": 1,
-            "aggregate": "fedprox"
+            "aggregate": "fedprox",
+            "defense": 0
         },
         {
             "dist": "iid",
             "n_attack": 2,
-            "aggregate": "fedprox"
+            "aggregate": "fedprox",
+            "defense": 0
         },
         {
             "dist": "noniid",
             "n_attack": 0,
-            "aggregate": "fedprox"
+            "aggregate": "fedprox",
+            "defense": 0
         },
         {
             "dist": "noniid",
             "n_attack": 1,
-            "aggregate": "fedprox"
+            "aggregate": "fedprox",
+            "defense": 0
         },
         {
             "dist": "noniid",
             "n_attack": 2,
-            "aggregate": "fedprox"
+            "aggregate": "fedprox",
+            "defense": 0
+        },
+        {
+            "dist": "iid",
+            "n_attack": 0,
+            "aggregate": "fedavg",
+            "defense": 1
+        },
+        {
+            "dist": "iid",
+            "n_attack": 1,
+            "aggregate": "fedavg",
+            "defense": 1
+        },
+        {
+            "dist": "iid",
+            "n_attack": 2,
+            "aggregate": "fedavg",
+            "defense": 1
+        },
+        {
+            "dist": "iid",
+            "n_attack": 0,
+            "aggregate": "krum",
+            "defense": 0
+        },
+        {
+            "dist": "iid",
+            "n_attack": 1,
+            "aggregate": "krum",
+            "defense": 1
+        },
+        {
+            "dist": "iid",
+            "n_attack": 2,
+            "aggregate": "krum",
+            "defense": 2
         }
     ]
 }

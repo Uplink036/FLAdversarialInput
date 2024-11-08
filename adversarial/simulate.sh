@@ -1,9 +1,11 @@
 #!/bin/bash
 
 ENV_FILE="/workspaces/FLAdverSarialInput/adversarial/.env"
-for i in $(seq 0 11);
+for i in $(seq 0 17);
 do
 # Check if the .env file exists
+
+    mkdir -p ./adversarial/logging/$i
     if [[ ! -f "$ENV_FILE" ]]; then
         echo "Error: .env file not found at $ENV_FILE"
         exit 1

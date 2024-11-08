@@ -3,6 +3,7 @@
 ENV_FILE="/workspaces/FLAdverSarialInput/adversarial/.env"
 
 choosen_conf=$1
+mkdir -p ./adversarial/logging/$choosen_conf
 if [[ ! -f "$ENV_FILE" ]]; then
     echo "Error: .env file not found at $ENV_FILE"
     exit 1
@@ -21,4 +22,5 @@ else
     echo "COUNT="$choosen_conf"" >> "$ENV_FILE"
     echo "COUNT added with value $choosen_conf"
 fi
+
 flwr run --run-config "num_cpus"=8
