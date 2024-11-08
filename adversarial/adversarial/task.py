@@ -7,11 +7,14 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 from flwr_datasets import FederatedDataset
-from flwr_datasets.partitioner import IidPartitioner
+from flwr_datasets.partitioner import IidPartitioner, PathologicalPartitioner
 from torch.utils.data import DataLoader
 from torchvision.transforms import Compose, Normalize, ToTensor
 from sklearn.metrics import accuracy_score, f1_score, roc_auc_score, cohen_kappa_score
-
+import pandas as pd
+import os
+from adversarial.configs import Configs
+import dotenv
 
 class Net(nn.Module):
     """Model (simple CNN adapted from 'PyTorch: A 60 Minute Blitz')"""
@@ -40,9 +43,16 @@ fds = None  # Cache FederatedDataset
 def load_data(partition_id: int, num_partitions: int):
     """Load partition CIFAR10 data."""
     # Only initialize `FederatedDataset` once
+    # Get environment variables COUNT
+    dotenv.load_dotenv()
+    count = int(os.environ['COUNT'].strip())
+    config = Configs("adversarial/configs.json", count)
     global fds
     if fds is None:
-        partitioner = IidPartitioner(num_partitions=num_partitions)
+        if config.get_distribution() == "iid":
+            partitioner = IidPartitioner(num_partitions=num_partitions)
+        else:
+            partitioner = PathologicalPartitioner(num_partitions=num_partitions, partition_by=config.get_partition_by(), num_classes_per_partition=config.get_classes_per_partition())
         fds = FederatedDataset(
             dataset="uoft-cs/cifar10",
             partitioners={"train": partitioner},
@@ -114,7 +124,10 @@ def eval_metrics(y_true, y_pred):
     y_pred_bin = np.eye(10)[y_pred]
 
     # Calculate ROC AUC
-    roc_auc = roc_auc_score(y_true_bin, y_pred_bin, average='weighted', multi_class='ovr')
+    try:
+        roc_auc = roc_auc_score(y_true_bin, y_pred_bin, average='weighted', multi_class='ovr')
+    except ValueError:
+        roc_auc = 0.5
     return f1, roc_auc, cohen_kappa
 
 def get_weights(net):
