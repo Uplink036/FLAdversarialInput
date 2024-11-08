@@ -29,6 +29,7 @@ class FlowerClient(NumPyClient):
             config["malicious"] = False
         else:
             set_weights(self.net, parameters)
+            print(f"Working on partition [{self.partition_id}]...")
         train_loss = train(
             self.net,
             self.trainloader,
@@ -48,6 +49,7 @@ class FlowerClient(NumPyClient):
 
 
 def client_fn(context: Context):
+    print(f"Starting client with config: {context.node_config}")
     # Load model and data
     net = Net()
     partition_id = context.node_config["partition-id"]

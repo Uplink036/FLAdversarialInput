@@ -90,6 +90,7 @@ def train(net, trainloader, epochs, device):
             loss = criterion(net(images.to(device)), labels.to(device))
             loss.backward()
             optimizer.step()
+            print(net.conv1.weight.grad)
             running_loss += loss.item()
 
     avg_trainloss = running_loss / len(trainloader)
@@ -131,7 +132,8 @@ def eval_metrics(y_true, y_pred):
     return f1, roc_auc, cohen_kappa
 
 def get_weights(net):
-    return [val.cpu().numpy() for _, val in net.state_dict().items()]
+    weights = [val.cpu().numpy() for _, val in net.state_dict().items()]
+    return weights
 
 
 def set_weights(net, parameters):
