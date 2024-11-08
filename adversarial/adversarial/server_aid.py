@@ -15,7 +15,7 @@ count = int(os.environ['COUNT'])
 config = Configs("adversarial/configs.json", count)
 
 counter = 0
-def weighted_average(metrics: list[tuple[int, dict[str, float]]]):
+def weighted_evaluate_average(metrics: list[tuple[int, dict[str, float]]]):
     global counter
 
     # Multiply accuracy of each client by number of examples used
