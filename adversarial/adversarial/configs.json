@@ -1,0 +1,64 @@
+{
+    "configs": [
+        {
+            "dist": "iid",
+            "n_attack": 0,
+            "aggregate": "fedavg"
+        },
+        {
+            "dist": "iid",
+            "n_attack": 1,
+            "aggregate": "fedavg"
+        },
+        {
+            "dist": "iid",
+            "n_attack": 2,
+            "aggregate": "fedavg"
+        },
+        {
+            "dist": "noniid",
+            "n_attack": 0,
+            "aggregate": "fedavg"
+        },
+        {
+            "dist": "noniid",
+            "n_attack": 1,
+            "aggregate": "fedavg"
+        },
+        {
+            "dist": "noniid",
+            "n_attack": 2,
+            "aggregate": "fedavg"
+        },
+        {
+            "dist": "iid",
+            "n_attack": 0,
+            "aggregate": "fedprox"
+        },
+        {
+            "dist": "iid",
+            "n_attack": 1,
+            "aggregate": "fedprox"
+        },
+        {
+            "dist": "iid",
+            "n_attack": 2,
+            "aggregate": "fedprox"
+        },
+        {
+            "dist": "noniid",
+            "n_attack": 0,
+            "aggregate": "fedprox"
+        },
+        {
+            "dist": "noniid",
+            "n_attack": 1,
+            "aggregate": "fedprox"
+        },
+        {
+            "dist": "noniid",
+            "n_attack": 2,
+            "aggregate": "fedprox"
+        }
+    ]
+}
