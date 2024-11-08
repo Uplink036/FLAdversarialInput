@@ -1,6 +1,11 @@
-from flwr.common import FitIns, Parameters
+
+from functools import partial, reduce
+from typing import Optional, Union
+from flwr.common import FitIns, Parameters, FitRes, Scalar, parameters_to_ndarrays, ndarrays_to_parameters, NDArrays
+from flwr.server.client_proxy import ClientProxy
 from flwr.server.strategy import FedAvg, FedProx
 import pandas as pd
+import numpy as np
 from adversarial.configs import Configs
 import os
 import dotenv
