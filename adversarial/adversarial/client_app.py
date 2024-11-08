@@ -4,15 +4,16 @@ import torch
 
 from flwr.client import ClientApp, NumPyClient
 from flwr.common import Context
+from torch.utils.data import DataLoader
 from adversarial.task import Net, get_weights, load_data, set_weights, test, train
-
+import numpy as np
 
 # Define Flower Client and client_fn
 class FlowerClient(NumPyClient):
     def __init__(self, net, partition_id, trainloader, valloader, local_epochs):
         self.net = net
         self.partition_id = partition_id
-        self.trainloader = trainloader
+        self.trainloader: DataLoader = trainloader
         self.valloader = valloader
         self.local_epochs = local_epochs
         self.device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
@@ -20,10 +21,14 @@ class FlowerClient(NumPyClient):
 
     def fit(self, parameters, config):
         if "malicious" in config.keys() and config["malicious"] == True:
-            print("Bad Stuff")
+            print(f"Attacking partition [{self.partition_id}]...")
+            current_weights = get_weights(self.net)
+            for layer in current_weights:
+                np.random.shuffle(layer)
+            set_weights(self.net, current_weights)
             config["malicious"] = False
-        
-        set_weights(self.net, parameters)
+        else:
+            set_weights(self.net, parameters)
         train_loss = train(
             self.net,
             self.trainloader,

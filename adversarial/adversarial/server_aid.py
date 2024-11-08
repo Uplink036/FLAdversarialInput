@@ -29,7 +29,6 @@ class CustomClientConfigStrategy(FedAvg):
         # if server_round == 1:
         attack_targets = 1
         attack_config = {"malicious": True}
-        config = {"malicious": False}
         fit_configurations = []
         for idx, client in enumerate(clients):
             if idx < attack_targets:
