@@ -51,11 +51,10 @@ class CustomClientConfigStrategyFedAvg(FedAvg):
         )
         clients = client_manager.sample(num_clients=sample_size)
 
-        # if server_round == 1:
         global config
         attack_targets = config.get_attacker_num()
         attack_config = {"malicious": True}
-
+        
         fit_configurations = []
         for idx, client in enumerate(clients):
             if idx < attack_targets:

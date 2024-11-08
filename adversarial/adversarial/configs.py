@@ -4,8 +4,8 @@ class Configs():
     def __init__(self, configs_file, config_num):
         self._config_num = config_num
         self.configs = json.load(open(configs_file))["configs"]
-        self._proximal_mu = 0.1
-        self._classes_per_partition = 10
+        self._proximal_mu = 1.0
+        self._classes_per_partition = 7
         self._partition_by = "label"
     
     def _get_current_config(self):
