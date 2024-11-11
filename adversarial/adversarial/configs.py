@@ -5,7 +5,7 @@ class Configs():
         self._config_num = config_num
         self.configs = json.load(open(configs_file))["configs"]
         self._proximal_mu = 1.0
-        self._classes_per_partition = 7
+        self._alpha = 0.5
         self._partition_by = "label"
     
     def _get_current_config(self):
@@ -26,7 +26,7 @@ class Configs():
         else:
             raise ValueError("Proximal mu is only used in FedProx")
     
-    def get_classes_per_partition(self):
+    def get_alpha(self):
         if self.get_distribution() == "noniid":
             return self._classes_per_partition
         else:

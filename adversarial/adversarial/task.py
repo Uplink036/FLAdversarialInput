@@ -7,7 +7,7 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 from flwr_datasets import FederatedDataset
-from flwr_datasets.partitioner import IidPartitioner, PathologicalPartitioner
+from flwr_datasets.partitioner import IidPartitioner, PathologicalPartitioner, DirichletPartitioner
 from torch.utils.data import DataLoader
 from torchvision.transforms import Compose, Normalize, ToTensor
 from sklearn.metrics import accuracy_score, f1_score, roc_auc_score, cohen_kappa_score
@@ -52,11 +52,12 @@ def load_data(partition_id: int, num_partitions: int):
         if config.get_distribution() == "iid":
             partitioner = IidPartitioner(num_partitions=num_partitions)
         else:
-            partitioner = PathologicalPartitioner(num_partitions=num_partitions, partition_by=config.get_partition_by(), num_classes_per_partition=config.get_classes_per_partition())
+            partitioner = DirichletPartitioner(num_partitions=num_partitions, partition_by=config.get_partition_by(), alpha=config.get_alpha())
         fds = FederatedDataset(
             dataset="uoft-cs/cifar10",
             partitioners={"train": partitioner},
         )
+    
     partition = fds.load_partition(partition_id)
     # Divide data on each node: 80% train, 20% test
     partition_train_test = partition.train_test_split(test_size=0.2, seed=42)
@@ -126,8 +127,10 @@ def eval_metrics(y_true, y_pred):
     # Calculate ROC AUC
     try:
         roc_auc = roc_auc_score(y_true_bin, y_pred_bin, average='weighted', multi_class='ovr')
-    except ValueError:
+    except ValueError as e:
+        print("ROC AUC calculation failed. Setting ROC AUC to 0.5", e)
         roc_auc = 0.5
+
     return f1, roc_auc, cohen_kappa
 
 def get_weights(net):
