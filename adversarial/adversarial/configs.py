@@ -28,7 +28,7 @@ class Configs():
     
     def get_alpha(self):
         if self.get_distribution() == "noniid":
-            return self._classes_per_partition
+            return self._alpha
         else:
             raise ValueError("Classes per partition is only used in Non-IID")
     
