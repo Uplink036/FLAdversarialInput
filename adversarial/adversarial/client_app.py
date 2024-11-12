@@ -45,6 +45,7 @@ class FlowerClient(NumPyClient):
     def evaluate(self, parameters, config):
         set_weights(self.net, parameters)
         loss, accuracy, f1, roc_auc, kappa = test(self.net, self.valloader, self.device)
+        print(f"Partition [{self.partition_id}] - Loss: {loss}, Accuracy: {accuracy}, F1: {f1}, ROC AUC: {roc_auc}, Kappa: {kappa}")
         return loss, len(self.valloader.dataset), {"accuracy": accuracy, "kappa": kappa, "f1": f1, "roc_auc": roc_auc}
 
 

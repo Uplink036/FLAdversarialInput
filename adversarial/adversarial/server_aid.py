@@ -17,7 +17,7 @@ config = Configs("adversarial/configs.json", count)
 counter = 0
 def weighted_evaluate_average(metrics: list[tuple[int, dict[str, float]]]):
     global counter
-
+    
     # Multiply accuracy of each client by number of examples used
     accuracies = [num_examples*m["accuracy"] for num_examples, m in metrics]
     kappa = [num_examples*m["kappa"] for num_examples, m in metrics]
@@ -52,7 +52,7 @@ def outlier_fit_average(
         """Compute in-place weighted average."""
         # Count total examples
         num_examples_total = sum(fit_res.num_examples for (_, fit_res) in results)
-
+        print(f"Total examples: {num_examples_total}")
         # Compute scaling factors for each result
         scaling_factors = np.asarray(
             [fit_res.num_examples / num_examples_total for _, fit_res in results]

@@ -80,7 +80,7 @@ def train(net, trainloader, epochs, device):
     """Train the model on the training set."""
     net.to(device)  # move model to GPU if available
     criterion = torch.nn.CrossEntropyLoss().to(device)
-    optimizer = torch.optim.Adam(net.parameters(), lr=0.01)
+    optimizer = torch.optim.Adam(net.parameters(), lr=0.001)
     net.train()
     running_loss = 0.0
     for _ in range(epochs):
@@ -101,36 +101,32 @@ def test(net, testloader, device):
     """Validate the model on the test set."""
     net.to(device)
     criterion = torch.nn.CrossEntropyLoss()
-    correct, loss = 0, 0.0
+    correct, total, loss = 0, 0, 0.0
     y_test, y_pred = [], []
+    net.eval()
     with torch.no_grad():
         for batch in testloader:
             images = batch["img"].to(device)
             labels = batch["label"].to(device)
             outputs = net(images)
             y_test += [label.item() for label in labels]
-            y_pred += [torch.max(output, 0)[1].item() for output in outputs]
+            _, y_pred = torch.max(outputs.data, 1)
             loss += criterion(outputs, labels).item()
-            correct += (torch.max(outputs.data, 1)[1] == labels).sum().item()
-    accuracy = correct / len(testloader.dataset)
+            total += labels.size(0)
+            correct += (y_pred == labels).sum().item()
+    accuracy = correct / total
     loss = loss / len(testloader)
-    f1, roc_auc, cohen_kappa_score = eval_metrics(y_test, y_pred)
+    f1, roc_auc, cohen_kappa_score = eval_metrics(labels, y_pred)
     return loss, accuracy, f1, roc_auc, cohen_kappa_score
 
 def eval_metrics(y_true, y_pred):
     f1 = f1_score(y_true, y_pred, average='weighted')
     cohen_kappa = cohen_kappa_score(y_true, y_pred)
 
-    y_true_bin = np.eye(10)[y_true]
-    y_pred_bin = np.eye(10)[y_pred]
-
-    # Calculate ROC AUC
-    try:
-        roc_auc = roc_auc_score(y_true_bin, y_pred_bin, average='weighted', multi_class='ovr')
-    except ValueError as e:
-        print("ROC AUC calculation failed. Setting ROC AUC to 0.5", e)
-        roc_auc = 0.5
-
+    y_pred = F.one_hot(y_pred, num_classes=10)
+    y_true = y_true.numpy()
+    roc_auc = roc_auc_score(y_true, y_pred, average='weighted', multi_class='ovo', labels=range(0,10))
+  
     return f1, roc_auc, cohen_kappa
 
 def get_weights(net):
