@@ -1,12 +1,11 @@
 """Adversarial: A Flower / PyTorch app."""
 
+import numpy as np
 import torch
-
+from adversarial.task import Net, get_weights, load_data, set_weights, test, train
 from flwr.client import ClientApp, NumPyClient
 from flwr.common import Context
 from torch.utils.data import DataLoader
-from adversarial.task import Net, get_weights, load_data, set_weights, test, train
-import numpy as np
 
 # Define Flower Client and client_fn
 class FlowerClient(NumPyClient):
@@ -19,7 +18,11 @@ class FlowerClient(NumPyClient):
         self.device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
         self.net.to(self.device)
 
-    def fit(self, parameters, config):
+    def fit(
+            self, 
+            parameters, 
+            config
+        ):
         if "malicious" in config.keys() and config["malicious"] == True:
             print(f"Attacking partition [{self.partition_id}]...")
             current_weights = get_weights(self.net)
@@ -42,15 +45,19 @@ class FlowerClient(NumPyClient):
             {"train_loss": train_loss},
         )
 
-    def evaluate(self, parameters, config):
+    def evaluate(
+            self, 
+            parameters, 
+            config
+        ):
         set_weights(self.net, parameters)
         loss, accuracy, f1, roc_auc, kappa = test(self.net, self.valloader, self.device)
-        print(f"Partition [{self.partition_id}] - Loss: {loss}, Accuracy: {accuracy}, F1: {f1}, ROC AUC: {roc_auc}, Kappa: {kappa}")
         return loss, len(self.valloader.dataset), {"accuracy": accuracy, "kappa": kappa, "f1": f1, "roc_auc": roc_auc}
 
 
-def client_fn(context: Context):
-    print(f"Starting client with config: {context.node_config}")
+def client_fn(
+        context: Context
+    ):
     # Load model and data
     net = Net()
     partition_id = context.node_config["partition-id"]
