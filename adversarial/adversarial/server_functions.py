@@ -1,12 +1,6 @@
-
-from functools import partial, reduce
-from typing import Optional, Union
-from flwr.common import Parameters, FitRes, Scalar, parameters_to_ndarrays, NDArray
-from flwr.server.client_proxy import ClientProxy
-import pandas as pd
-import numpy as np
-import os
 import dotenv
+import os
+import pandas as pd
 from adversarial.configs import Configs
 
 dotenv.load_dotenv()
