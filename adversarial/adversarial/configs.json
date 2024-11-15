@@ -100,13 +100,13 @@
             "dist": "iid",
             "n_attack": 1,
             "aggregate": "krum",
-            "defense": 1
+            "defense": 0
         },
         {
             "dist": "iid",
             "n_attack": 2,
             "aggregate": "krum",
-            "defense": 2
+            "defense": 0
         }
     ]
 }
