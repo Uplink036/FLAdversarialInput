@@ -1,24 +1,20 @@
 """Adversarial: A Flower / PyTorch app."""
 
-from collections import OrderedDict
-
-import numpy as np
+import dotenv
+import os
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
+from adversarial.configs import Configs
+from collections import OrderedDict
 from flwr_datasets import FederatedDataset
-from flwr_datasets.partitioner import IidPartitioner, PathologicalPartitioner, DirichletPartitioner
+from flwr_datasets.partitioner import IidPartitioner, DirichletPartitioner
+from sklearn.metrics import f1_score, roc_auc_score, cohen_kappa_score
 from torch.utils.data import DataLoader
 from torchvision.transforms import Compose, Normalize, ToTensor
-from sklearn.metrics import accuracy_score, f1_score, roc_auc_score, cohen_kappa_score
-import pandas as pd
-import os
-from adversarial.configs import Configs
-import dotenv
 
 class Net(nn.Module):
     """Model (simple CNN adapted from 'PyTorch: A 60 Minute Blitz')"""
-
     def __init__(self):
         super(Net, self).__init__()
         self.conv1 = nn.Conv2d(3, 6, 5)
@@ -38,15 +34,15 @@ class Net(nn.Module):
 
 
 fds = None  # Cache FederatedDataset
-
-
-def load_data(partition_id: int, num_partitions: int):
+def load_data(
+        partition_id: int, 
+        num_partitions: int
+    ):
     """Load partition CIFAR10 data."""
-    # Only initialize `FederatedDataset` once
-    # Get environment variables COUNT
     dotenv.load_dotenv()
     count = int(os.environ['COUNT'].strip())
     config = Configs("adversarial/configs.json", count)
+
     global fds
     if fds is None:
         if config.get_distribution() == "iid":
@@ -59,7 +55,6 @@ def load_data(partition_id: int, num_partitions: int):
         )
     
     partition = fds.load_partition(partition_id)
-    # Divide data on each node: 80% train, 20% test
     partition_train_test = partition.train_test_split(test_size=0.2, seed=42)
     pytorch_transforms = Compose(
         [ToTensor(), Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5))]
@@ -76,7 +71,12 @@ def load_data(partition_id: int, num_partitions: int):
     return trainloader, testloader
 
 
-def train(net, trainloader, epochs, device):
+def train(
+        net, 
+        trainloader, 
+        epochs, 
+        device
+    ):
     """Train the model on the training set."""
     net.to(device)  # move model to GPU if available
     criterion = torch.nn.CrossEntropyLoss().to(device)
@@ -97,7 +97,11 @@ def train(net, trainloader, epochs, device):
     return avg_trainloss
 
 
-def test(net, testloader, device):
+def test(
+        net, 
+        testloader, 
+        device
+    ):
     """Validate the model on the test set."""
     net.to(device)
     criterion = torch.nn.CrossEntropyLoss()
@@ -119,7 +123,10 @@ def test(net, testloader, device):
     f1, roc_auc, cohen_kappa_score = eval_metrics(labels, y_pred)
     return loss, accuracy, f1, roc_auc, cohen_kappa_score
 
-def eval_metrics(y_true, y_pred):
+def eval_metrics(
+        y_true, 
+        y_pred
+    ):
     f1 = f1_score(y_true, y_pred, average='weighted')
     cohen_kappa = cohen_kappa_score(y_true, y_pred)
 
@@ -129,12 +136,17 @@ def eval_metrics(y_true, y_pred):
   
     return f1, roc_auc, cohen_kappa
 
-def get_weights(net):
+def get_weights(
+        net
+    ):
     weights = [val.cpu().numpy() for _, val in net.state_dict().items()]
     return weights
 
 
-def set_weights(net, parameters):
+def set_weights(
+        net, 
+        parameters
+    ):
     params_dict = zip(net.state_dict().keys(), parameters)
     state_dict = OrderedDict({k: torch.tensor(v) for k, v in params_dict})
     net.load_state_dict(state_dict, strict=True)
