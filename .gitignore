@@ -1,9 +1,12 @@
 # Project Specfic
-## CSV
+## Data Files
 *.csv
-
+*.zip
 ## nbdime
 *.orig
+
+## Pictures
+*.png
 
 
 # Template
