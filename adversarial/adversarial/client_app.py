@@ -24,7 +24,6 @@ class FlowerClient(NumPyClient):
             config
         ):
         if "malicious" in config.keys() and config["malicious"] == True:
-            print(f"Attacking partition [{self.partition_id}]...")
             current_weights = get_weights(self.net)
             for layer in current_weights:
                 np.random.shuffle(layer)
@@ -32,7 +31,6 @@ class FlowerClient(NumPyClient):
             config["malicious"] = False
         else:
             set_weights(self.net, parameters)
-            print(f"Working on partition [{self.partition_id}]...")
         train_loss = train(
             self.net,
             self.trainloader,
