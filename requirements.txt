@@ -2,3 +2,4 @@ matplotlib
 seaborn
 keras
 adversarial-robustness-toolbox
+tensorflow
