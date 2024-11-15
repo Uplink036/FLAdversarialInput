@@ -6,8 +6,8 @@ import pandas as pd
 import os
 import dotenv
 from adversarial.configs import Configs
-from adversarial.server_aid import weighted_evaluate_average, CustomClientConfigStrategyFedAvg, CustomClientConfigStrategyFedProx, fit_config, CustomClientConfigStrategyKrum
-
+from adversarial.server_strategies import CustomClientConfigStrategyFedAvg, CustomClientConfigStrategyFedProx, CustomClientConfigStrategyKrum
+from adversarial.server_functions import weighted_evaluate_average, fit_config
 def server_fn(context: Context):
     # Read from config
     dotenv.load_dotenv()
